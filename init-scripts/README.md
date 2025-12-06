@@ -26,6 +26,5 @@ This directory contains scripts for initializing the DeSearch database.
 
 ## Security Note
 
-- The `01-init.sql` file contains database credentials and should never be committed to version control.
 - The `.gitignore` file is configured to exclude `01-init.sql` but include the template and generator script.
 - Always ensure your `.env` file is properly secured and not committed to version control.
