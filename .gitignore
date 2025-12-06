@@ -1,0 +1,155 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv/
+env.bak/
+venv.bak/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+.vault.*
+.secrets.*
+
+# Database
+*.sql
+!init-scripts/01-init.sql.template
+!init-scripts/generate-init-sql.sh
+
+# Configuration
+alembic.ini
+!alembic.ini.template
+
+# Generated files
+init-scripts/01-init.sql
+
+# Python get-pip script
+get-pip.py
+
+# Setup scripts with secrets
+setup_env.sh
+setup_*.sh
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.pydevproject
+.settings/
+*.sublime-*
+.spyderproject
+.spyproject
+
+# Database
+*.sqlite
+*.sqlite3
+*.sql
+*.sql.gz
+*.sqlite-journal
+*.db
+*.db-journal
+*.frm
+*.myd
+*.myi
+*.ibd
+*.ibdata
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.log
+*.log.*
+log/
+logs/
+
+# Local development
+.DS_Store
+.direnv/
+.envrc
+.python-version
+.local/
+.webassets-cache
+.scannerwork/
+
+# Docker
+**/data/
+**/volumes/
+**/pgdata/
+**/meili_data/
+
+# Application specific
+/backend/.env
+/backend/.env.*
+!/backend/.env.example
+/init-scripts/01-init.sql
+/init-scripts/*.sql
+!/init-scripts/*.sql.template
+!/init-scripts/README.md
+
+# Node modules (if any)
+node_modules/
+jspm_packages/
+.npm
+.eslintcache
+.yarn-integrity
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# MeiliSearch data
+meili_data/
+data.ms/
+*.ms/
+
+# Python get-pip script
+get-pip.py
+
+# Setup scripts with secrets
+setup_env.sh
+setup_*.sh
+
+# Database migrations with credentials
+alembic.ini
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb

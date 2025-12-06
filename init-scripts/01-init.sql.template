@@ -1,0 +1,18 @@
+-- Database initialization script for DeSearch
+-- This file is a template. Copy it to 01-init.sql and replace the placeholders.
+
+-- Create database user with environment variables
+CREATE USER ${POSTGRES_USER} WITH PASSWORD '${POSTGRES_PASSWORD}' SUPERUSER;
+
+-- Create database and assign ownership
+CREATE DATABASE ${POSTGRES_DB} OWNER ${POSTGRES_USER};
+
+-- Grant all privileges on the database to the user
+GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DB} TO ${POSTGRES_USER};
+
+-- Connect to the database
+\c ${POSTGRES_DB};
+
+-- Additional initialization queries can go here
+-- For example, creating extensions or initial tables
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
