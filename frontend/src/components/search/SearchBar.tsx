@@ -1,3 +1,4 @@
+// frontend/src/components/search/SearchBar.tsx
 'use client'
 
 import { Search } from 'lucide-react'
@@ -6,17 +7,29 @@ import { Button } from '@/components/ui/button'
 import { useState, useRef, useEffect } from 'react'
 import { useSearch } from '@/contexts/SearchContext'
 
+// Common tags that appear in coding questions
+const COMMON_TAGS = [
+  'Array', 'String', 'Hash Table', 'Dynamic Programming', 'Math',
+  'Sorting', 'Greedy', 'Depth-First Search', 'Binary Search'
+]
+
 export default function SearchBar() {
   const [query, setQuery] = useState('')
-  const { search, isLoading } = useSearch()
+  const { 
+    search, 
+    isLoading, 
+    selectedDifficulty, 
+    setSelectedDifficulty,
+    selectedTags,
+    toggleTag
+  } = useSearch()
   const searchButtonRef = useRef<HTMLButtonElement>(null)
 
   const handleSearch = () => {
     if (!query.trim()) return
-    search(query)
+    search(query, selectedDifficulty, selectedTags)
   }
 
-  // Handle Enter key press
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearch()
@@ -24,7 +37,8 @@ export default function SearchBar() {
   }
 
   return (
-    <div className="relative mb-8">
+    <div className="relative mb-8 w-full max-w-4xl mx-auto">
+      {/* Search Input */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -44,26 +58,49 @@ export default function SearchBar() {
           {isLoading ? 'Searching...' : 'Search'}
         </Button>
       </div>
-      
-      <div className="flex flex-wrap gap-4 mt-4">
-        <div className="flex-1 min-w-[200px]">
-          <label className="text-sm font-medium mb-1 block">Topics</label>
-          <select className="w-full p-2 border rounded">
-            <option>All Topics</option>
-            <option>Algorithms</option>
-            <option>Data Structures</option>
-            <option>System Design</option>
-          </select>
+
+      {/* Filters Section - Minimal Style */}
+      <div className="mt-4 space-y-3">
+        {/* Difficulty Filter */}
+        <div>
+          <div className="flex items-center space-x-2 text-sm">
+            <span className="text-muted-foreground">Difficulty:</span>
+            {(['Easy', 'Medium', 'Hard'] as const).map((level) => (
+              <button
+                key={level}
+                className={`px-2 py-1 rounded text-sm ${
+                  selectedDifficulty === level 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'hover:bg-muted'
+                }`}
+                onClick={() => setSelectedDifficulty(
+                  selectedDifficulty === level ? '' : level
+                )}
+              >
+                {level}
+              </button>
+            ))}
+          </div>
         </div>
-        
-        <div className="w-32">
-          <label className="text-sm font-medium mb-1 block">Difficulty</label>
-          <select className="w-full p-2 border rounded">
-            <option>Any</option>
-            <option>Easy</option>
-            <option>Medium</option>
-            <option>Hard</option>
-          </select>
+
+        {/* Tags Filter */}
+        <div>
+          <div className="flex items-center flex-wrap gap-1 text-sm">
+            <span className="text-muted-foreground mr-2">Tags:</span>
+            {COMMON_TAGS.map((tag) => (
+              <button
+                key={tag}
+                className={`px-2 py-1 rounded text-sm ${
+                  selectedTags.includes(tag)
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'hover:bg-muted'
+                }`}
+                onClick={() => toggleTag(tag)}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
