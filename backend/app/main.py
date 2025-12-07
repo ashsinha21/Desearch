@@ -4,13 +4,14 @@ import asyncio
 from app.routers import search, metrics
 from app.services.db import init_db
 from app.services.meili_client import init_meilisearch
+import os 
 
 app = FastAPI(title="DESearch API", version="0.1.0")
 
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=os.getenv("CORS_ORIGINS", "").split(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

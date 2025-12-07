@@ -1,5 +1,6 @@
 import os
 import logging
+import time
 from typing import Optional, List, Dict, Any
 from dotenv import load_dotenv
 from meilisearch_python_sdk import Client, AsyncClient
@@ -11,7 +12,6 @@ logger = logging.getLogger(__name__)
 # Load environment variables from .env file
 load_dotenv()
 
-# Get environment variables with validation
 def get_env_variable(name: str, default: Optional[str] = None) -> str:
     """Get environment variable or raise an error if not found and no default provided."""
     value = os.getenv(name, default)
@@ -19,17 +19,42 @@ def get_env_variable(name: str, default: Optional[str] = None) -> str:
         raise ValueError(f"Environment variable {name} is not set")
     return value
 
-# Load configuration
-MEILI_HOST = get_env_variable("MEILI_HOST", "http://localhost:7700")
-MEILI_MASTER_KEY = get_env_variable("MEILI_MASTER_KEY", "masterKey")
+def initialize_meilisearch_client(max_retries: int = 3, retry_delay: int = 2):
+    """Initialize MeiliSearch client with retry logic."""
+    MEILI_HOST = get_env_variable("MEILI_HOST", "http://meilisearch:7700")
+    MEILI_MASTER_KEY = get_env_variable("MEILI_MASTER_KEY", "")
+    
+    last_exception = None
+    
+    for attempt in range(max_retries):
+        try:
+            logger.info(f"Attempting to connect to MeiliSearch (Attempt {attempt + 1}/{max_retries})")
+            
+            # Initialize clients
+            sync_client = Client(MEILI_HOST, MEILI_MASTER_KEY, timeout=10)
+            async_client = AsyncClient(MEILI_HOST, MEILI_MASTER_KEY, timeout=10)
+            
+            # Test the connection
+            sync_client.health()
+            
+            logger.info("Successfully connected to MeiliSearch")
+            return sync_client, async_client
+            
+        except Exception as e:
+            last_exception = e
+            logger.warning(f"Connection attempt {attempt + 1} failed: {str(e)}")
+            if attempt < max_retries - 1:
+                logger.info(f"Retrying in {retry_delay} seconds...")
+                time.sleep(retry_delay)
+    
+    logger.error("Max retries reached. Could not connect to MeiliSearch.")
+    raise ConnectionError(f"Failed to connect to MeiliSearch after {max_retries} attempts") from last_exception
 
-# Initialize clients with error handling
+# Initialize clients
 try:
-    meili_client = Client(MEILI_HOST, MEILI_MASTER_KEY, timeout=10)
-    async_meili_client = AsyncClient(MEILI_HOST, MEILI_MASTER_KEY, timeout=10)
-    logger.info("Successfully initialized MeiliSearch clients")
+    meili_client, async_meili_client = initialize_meilisearch_client()
 except Exception as e:
-    logger.error(f"Failed to initialize MeiliSearch clients: {str(e)}")
+    logger.critical(f"Critical: Could not initialize MeiliSearch clients: {str(e)}")
     raise
 
 # Index names

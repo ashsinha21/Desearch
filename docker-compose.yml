@@ -1,17 +1,15 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15-alpine
     container_name: desearch_db
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_INITDB_ARGS: '--data-checksums'
       PGDATA: /var/lib/postgresql/data/pgdata
     env_file:
-      - ./backend/.env
+      - .env
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
@@ -21,7 +19,7 @@ services:
       - app_network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -32,12 +30,13 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # In docker-compose.yml
   meilisearch:
     image: getmeili/meilisearch:v1.5
     container_name: desearch_meilisearch
     environment:
-      - MEILI_MASTER_KEY=b88290ba2a96e389ff68d9c6c1a1d7d6306484828bfeb9284930b46b0a855609
-      - MEILI_ENV=development
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY}
+      - MEILI_ENV=${MEILI_ENV}
       - MEILI_NO_ANALYTICS=true
     volumes:
       - meili_data:/meili_data
@@ -64,7 +63,10 @@ services:
       dockerfile: Dockerfile
     container_name: desearch_backend
     env_file: 
-      - ./backend/.env
+      - .env
+    environment:
+      - MEILI_HOST=http://meilisearch:7700
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY}
     ports:
       - "8001:8000"
     volumes:
