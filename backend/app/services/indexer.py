@@ -18,37 +18,56 @@ class Indexer:
         if questions:
             await self.async_index.add_documents(questions)
 
-    async def search_questions(self, query: str, filters: Optional[str] = None, limit: int = 10) -> dict:
-        """Search questions with optional filters"""
+    async def search_questions(
+        self, 
+        query: str, 
+        filters: Optional[str] = None, 
+        limit: int = 10
+    ) -> dict:
         try:
-            # For MeiliSearch v1.0+ compatibility
-            params = {
+            # Prepare the search payload
+            payload = {
                 'q': query,
                 'limit': limit,
-                'attributesToRetrieve': ['*'],
-                'showMatchesPosition': True
+                'showMatchesPosition': True,
+                'matchingStrategy': 'all'
             }
             
+            # Add filters if provided
             if filters:
-                params['filter'] = filters
+                payload['filter'] = filters
             
-            # Use the search method with explicit parameters
+            # Execute the search using the HTTP client directly
             response = await self.async_index._http_requests.post(
                 f"indexes/{self.async_index.uid}/search",
-                body=params
+                body=payload
             )
             
             # Parse the response
             result = response.json()
-                        
-            # Convert to the expected format
+            
+            # Log search metrics
+            logger.info(
+                f"Search completed - Query: '{query}', "
+                f"Found: {len(result.get('hits', []))} results, "
+                f"Took: {result.get('processingTimeMs', 0)}ms"
+            )
+            
+            # Return results in the expected format
             return {
-                'hits': result.get('hits', []),  # Using .get() for safety
-                'estimated_total_hits': result.get('estimatedTotalHits', 0),  # camelCase
-                'processing_time_ms': result.get('processingTimeMs', 0),  # camelCase
+                'hits': result.get('hits', []),
+                'estimated_total_hits': result.get('estimatedTotalHits', 0),
+                'processing_time_ms': result.get('processingTimeMs', 0),
                 'query': query
             }
             
         except Exception as e:
-            logger.error(f"Search error: {str(e)}")
-            raise  # Re-raise to be handled by the API route
+            error_msg = f"Search error: {str(e)}"
+            logger.error(error_msg, exc_info=True)
+            return {
+                'hits': [],
+                'estimated_total_hits': 0,
+                'processing_time_ms': 0,
+                'query': query,
+                'error': error_msg
+            }
