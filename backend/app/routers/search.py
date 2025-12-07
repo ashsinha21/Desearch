@@ -37,7 +37,7 @@ async def search_questions(
         filter_query = " AND ".join(filters) if filters else None
         
         result = await indexer.search_questions(
-            query=search_query.q,
+            query=search_query.q or "",
             filters=filter_query,
             limit=search_query.limit
         )
