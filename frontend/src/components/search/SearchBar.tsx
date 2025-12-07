@@ -3,38 +3,26 @@
 import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
-
-// Get the API URL from environment variables or fallback to localhost
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'
+import { useState, useRef, useEffect } from 'react'
+import { useSearch } from '@/contexts/SearchContext'
 
 export default function SearchBar() {
-  const [query, setQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
+  const [query, setQuery] = useState('')
+  const { search, isLoading } = useSearch()
+  const searchButtonRef = useRef<HTMLButtonElement>(null)
 
-  const handleSearch = async () => {
-    if (!query.trim()) return;
-    
-    try {
-      setIsSearching(true);
-      const searchParams = new URLSearchParams({ q: query.trim() });
-      const response = await fetch(`${API_BASE_URL}/api/search?${searchParams.toString()}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      console.log('Search results:', data);
-      // Handle search results here
-    } catch (error) {
-      console.error('Search failed:', error);
-    } finally {
-      setIsSearching(false);
+  const handleSearch = () => {
+    if (!query.trim()) return
+    search(query)
+  }
+
+  // Handle Enter key press
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch()
     }
-  };
+  }
 
-  // Rest of your component remains the same
   return (
     <div className="relative mb-8">
       <div className="relative">
@@ -45,14 +33,15 @@ export default function SearchBar() {
           className="pl-10 pr-24 py-6 text-base"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+          onKeyDown={handleKeyDown}
         />
         <Button 
+          ref={searchButtonRef}
           className="absolute right-2 top-1/2 -translate-y-1/2"
           onClick={handleSearch}
-          disabled={isSearching || !query.trim()}
+          disabled={isLoading || !query.trim()}
         >
-          {isSearching ? 'Searching...' : 'Search'}
+          {isLoading ? 'Searching...' : 'Search'}
         </Button>
       </div>
       
